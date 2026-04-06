@@ -2,30 +2,108 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DODO FLAP - The Black Swan Returns</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DODO FLAP - The Black Swan</title>
   <style>
-    body { margin:0; background:#000; overflow:hidden; font-family: 'Courier New', monospace; color:#ff0000; text-align:center; }
-    .intro, .game-container { position: absolute; top:0; left:0; width:100%; height:100%; }
-    .intro { display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; }
+    body { 
+      margin:0; 
+      padding:0; 
+      background:#000; 
+      overflow:hidden; 
+      font-family: 'Courier New', monospace; 
+      color:#ff0000; 
+      touch-action: manipulation;
+    }
+    
+    .intro, .game-container { 
+      position: absolute; 
+      top:0; left:0; 
+      width:100%; height:100%; 
+    }
+    .intro { 
+      display:flex; 
+      flex-direction:column; 
+      align-items:center; 
+      justify-content:center; 
+      z-index:10; 
+      padding:20px;
+    }
     .game-container { display:none; }
 
-    h1 { font-size:5.5rem; margin:10px 0 5px; text-shadow:0 0 30px #ff0000; letter-spacing:12px; }
-    .subtitle { font-size:1.9rem; margin-bottom:20px; }
-    .dodo-image { max-width:380px; margin:20px 0 30px; filter:drop-shadow(0 0 40px rgba(255,30,30,0.7)); image-rendering:pixelated; }
-    .timer { font-size:3.4rem; font-weight:bold; letter-spacing:15px; text-shadow:0 0 40px #ff0000; margin:20px 0; }
-    .rules { max-width:620px; margin:30px auto; padding:20px; border:4px solid #ff0000; background:rgba(0,0,0,0.7); line-height:1.6; font-size:1.25rem; }
-    .start-btn { font-size:2.4rem; padding:20px 60px; background:#000; border:8px solid #ff0000; color:#ff0000; cursor:pointer; margin-top:30px; text-shadow:0 0 20px #ff0000; }
-    .start-btn:hover { background:#ff0000; color:#000; }
+    h1 { font-size:4.8rem; margin:8px 0 4px; text-shadow:0 0 30px #ff0000; letter-spacing:10px; }
+    .subtitle { font-size:1.7rem; margin-bottom:15px; }
+    .dodo-image { max-width:320px; margin:15px 0 25px; filter:drop-shadow(0 0 40px rgba(255,30,30,0.7)); image-rendering:pixelated; }
+    .timer { font-size:2.8rem; font-weight:bold; letter-spacing:10px; text-shadow:0 0 30px #ff0000; margin:15px 0; }
+    
+    .rules { 
+      max-width:90%; 
+      margin:25px auto; 
+      padding:18px; 
+      border:4px solid #ff0000; 
+      background:rgba(0,0,0,0.75); 
+      line-height:1.55; 
+      font-size:1.15rem; 
+    }
+    
+    .start-btn { 
+      font-size:2.2rem; 
+      padding:18px 50px; 
+      background:#000; 
+      border:7px solid #ff0000; 
+      color:#ff0000; 
+      cursor:pointer; 
+      margin-top:20px; 
+      text-shadow:0 0 20px #ff0000; 
+    }
+    .start-btn:active { background:#ff0000; color:#000; }
 
-    canvas { display:block; margin:0 auto; image-rendering:pixelated; }
-    #score { position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:3rem; text-shadow:0 0 25px #ff0000; pointer-events:none; z-index:5; }
-    #start-overlay { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); padding:40px 60px; border:8px solid #ff0000; font-size:2rem; line-height:1.5; z-index:10; display:none; cursor:pointer; }
-    .footer { position:absolute; bottom:15px; width:100%; font-size:1rem; opacity:0.6; }
+    canvas { 
+      display:block; 
+      margin:0 auto; 
+      image-rendering:pixelated; 
+      width:100%; 
+      max-height:100vh; 
+    }
+    
+    #score { 
+      position:absolute; 
+      top:15px; 
+      left:50%; 
+      transform:translateX(-50%); 
+      font-size:2.6rem; 
+      text-shadow:0 0 25px #ff0000; 
+      pointer-events:none; 
+      z-index:5; 
+    }
+    
+    #start-overlay { 
+      position:absolute; 
+      top:50%; 
+      left:50%; 
+      transform:translate(-50%,-50%); 
+      background:rgba(0,0,0,0.92); 
+      padding:35px 50px; 
+      border:7px solid #ff0000; 
+      font-size:1.8rem; 
+      line-height:1.6; 
+      z-index:10; 
+      text-align:center; 
+      cursor:pointer; 
+      max-width:85%;
+    }
+    .footer { 
+      position:absolute; 
+      bottom:12px; 
+      width:100%; 
+      font-size:0.95rem; 
+      opacity:0.65; 
+      line-height:1.4;
+    }
   </style>
 </head>
 <body>
 
-  <!-- INTRO SCREEN (the original DODO vibe) -->
+  <!-- INTRO SCREEN -->
   <div class="intro" id="intro">
     <h1>DODO</h1>
     <div class="subtitle">THE BLACK SWAN</div>
@@ -34,7 +112,7 @@
     
     <div class="timer" id="timer">115d 18h 3m 28s</div>
     
-    <p style="max-width:680px; font-size:1.4rem; line-height:1.6;">
+    <p style="max-width:90%; font-size:1.3rem; line-height:1.6; margin:15px 0;">
       Hatched on /biz/ July 31 2021<br>
       5 years later... the black swan returns to Solana.<br>
       <strong>Something’s coming.</strong>
@@ -42,10 +120,10 @@
 
     <div class="rules">
       <strong>HOW TO PLAY</strong><br>
-      • SPACE or CLICK to flap<br>
+      • SPACE or TAP anywhere to flap<br>
       • <span style="color:#ff2222">RED candles = LIQUIDATION</span><br>
       • <span style="color:#00ff55">GREEN candles = SAFE</span><br>
-      • Every 50 points the chart gets more chaotic (faster + tighter)<br>
+      • Every 50 points the chart gets more chaotic<br>
       • Survive as long as you can
     </div>
 
@@ -57,26 +135,24 @@
     </div>
   </div>
 
-  <!-- GAME SCREEN -->
+  <!-- GAME -->
   <div class="game-container" id="game-container">
     <div id="score">0</div>
-    <canvas id="game" width="800" height="500"></canvas>
+    <canvas id="game" width="800" height="620"></canvas>   <!-- taller canvas -->
     
-    <!-- Game start / rules overlay -->
     <div id="start-overlay" onclick="hideStartOverlay()">
       DODO FLAP<br>
-      <small style="font-size:1.3rem">
-        SPACE / CLICK to flap<br>
+      <small style="font-size:1.35rem">
+        TAP ANYWHERE or SPACE to flap<br>
         Red = liquidated • Green = safe<br>
-        Every 50 points = harder chart<br>
-        <br>
-        <strong>CLICK TO BEGIN</strong>
+        Every 50 points = harder chart<br><br>
+        <strong>CLICK / TAP TO BEGIN</strong>
       </small>
     </div>
   </div>
 
   <script>
-    // ==================== INTRO COUNTDOWN ====================
+    // Intro Countdown
     function startIntroCountdown() {
       let target = Date.now() + (115 * 24 * 60 * 60 * 1000) + (18 * 60 * 60 * 1000) + (3 * 60 * 1000) + (28 * 1000);
       setInterval(() => {
@@ -93,7 +169,7 @@
       }, 1000);
     }
 
-    // ==================== GAME LOGIC ====================
+    // Game Logic
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
     const scoreEl = document.getElementById('score');
@@ -104,15 +180,15 @@
     let dodoImg = new Image();
     dodoImg.src = 'https://i.imgur.com/ZolkD0O.jpg';
 
-    let bird = { x: 150, y: 250, vy: 0, size: 72, rotation: 0 };
-    let gravity = 0.45;
-    let flapStrength = -10.5;
+    let bird = { x: 150, y: 300, vy: 0, size: 75, rotation: 0 };
+    let gravity = 0.48;
+    let flapStrength = -11;
     let score = 0;
     let gameRunning = false;
     let pipes = [];
     let frame = 0;
-    let gameSpeed = 2.6;
-    let baseGap = 210;
+    let gameSpeed = 2.65;
+    let baseGap = 215;
     let level = 1;
 
     function startGame() {
@@ -129,14 +205,14 @@
     }
 
     function resetGame() {
-      bird.y = 250;
+      bird.y = 300;
       bird.vy = 0;
       score = 0;
       level = 1;
       pipes = [];
       frame = 0;
-      gameSpeed = 2.6;
-      baseGap = 210;
+      gameSpeed = 2.65;
+      baseGap = 215;
       scoreEl.textContent = '0';
     }
 
@@ -144,25 +220,30 @@
       if (gameRunning) bird.vy = flapStrength;
     }
 
-    document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); flap(); } });
+    // Tap anywhere on the whole screen to flap (mobile fix)
+    document.addEventListener('touchstart', e => { 
+      e.preventDefault(); 
+      flap(); 
+    });
+    document.addEventListener('keydown', e => { 
+      if (e.code === 'Space') { e.preventDefault(); flap(); } 
+    });
     canvas.addEventListener('mousedown', flap);
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); flap(); });
 
     function createPipe() {
       const gap = baseGap;
-      const minHeight = 90;
-      const maxHeight = canvas.height - gap - minHeight - 40;
+      const minHeight = 100;
+      const maxHeight = canvas.height - gap - minHeight - 50;
       const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
       
-      // Randomly decide normal or inverted pattern
-      const isInverted = Math.random() > 0.5;
+      const isInverted = Math.random() > 0.45;
       
       pipes.push({
-        x: canvas.width + 90,
+        x: canvas.width + 100,
         top: topHeight,
         bottom: canvas.height - (topHeight + gap),
         passed: false,
-        inverted: isInverted   // true = green on top, red on bottom
+        inverted: isInverted
       });
     }
 
@@ -172,14 +253,14 @@
       ctx.rotate(Math.sin(frame / 12) * 0.05);
       
       ctx.fillStyle = isGreen ? '#00ff55' : '#ff2222';
-      ctx.fillRect(-16, isGreen ? -height : 0, 32, height);
+      ctx.fillRect(-17, isGreen ? -height : 0, 34, height);
       
       ctx.strokeStyle = '#000';
       ctx.lineWidth = 9;
-      ctx.strokeRect(-16, isGreen ? -height : 0, 32, height);
+      ctx.strokeRect(-17, isGreen ? -height : 0, 34, height);
       
       ctx.fillStyle = '#111';
-      ctx.fillRect(-5, isGreen ? -height - 30 : height + 10, 10, 35);
+      ctx.fillRect(-5, isGreen ? -height - 32 : height + 12, 10, 36);
       
       ctx.restore();
     }
@@ -190,7 +271,6 @@
       ctx.fillStyle = '#0a0a0a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Grid
       ctx.strokeStyle = 'rgba(255,30,30,0.12)';
       ctx.lineWidth = 2;
       for (let i = 50; i < canvas.width; i += 80) {
@@ -200,10 +280,9 @@
         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
       }
 
-      // Bird
       bird.vy += gravity;
       bird.y += bird.vy;
-      bird.rotation = Math.min(Math.max(bird.vy * 4, -30), 50);
+      bird.rotation = Math.min(Math.max(bird.vy * 4.2, -32), 52);
 
       ctx.save();
       ctx.translate(bird.x, bird.y);
@@ -211,57 +290,50 @@
       ctx.drawImage(dodoImg, -bird.size/2, -bird.size/2, bird.size, bird.size);
       ctx.restore();
 
-      // Spawn pipes
-      if (frame % 82 === 0) createPipe();
+      if (frame % 78 === 0) createPipe();
 
       for (let i = pipes.length - 1; i >= 0; i--) {
         let p = pipes[i];
         p.x -= gameSpeed;
 
-        const topIsRed = !p.inverted;   // normal = red top, inverted = green top
+        const topIsRed = !p.inverted;
 
         drawCrudeCandle(p.x, p.top / 2, p.top, !topIsRed);
         drawCrudeCandle(p.x, canvas.height - p.bottom / 2, p.bottom, topIsRed);
 
-        // Collision only with RED candles
         const birdLeft = bird.x - bird.size/2 + 15;
         const birdRight = bird.x + bird.size/2 - 15;
-        const birdTop = bird.y - bird.size/2 + 20;
-        const birdBottom = bird.y + bird.size/2 - 20;
-
-        const redTopY = topIsRed ? p.top : 0;
-        const redBottomY = topIsRed ? canvas.height : canvas.height - p.bottom;
+        const birdTop = bird.y - bird.size/2 + 22;
+        const birdBottom = bird.y + bird.size/2 - 22;
 
         if (
-          (birdRight > p.x - 12 && birdLeft < p.x + 38) &&
-          ((topIsRed && birdTop < redTopY + 20) || (!topIsRed && birdBottom > redBottomY - 20))
+          (birdRight > p.x - 12 && birdLeft < p.x + 40) &&
+          ((topIsRed && birdTop < p.top + 25) || (!topIsRed && birdBottom > canvas.height - p.bottom - 25))
         ) {
           gameRunning = false;
-          startOverlay.innerHTML = `DODO LIQUIDATED<br><small>Score: ${score}</small><br><br><strong>CLICK TO FLAP AGAIN</strong>`;
+          startOverlay.innerHTML = `DODO LIQUIDATED<br><small>Score: ${score}</small><br><br><strong>TAP TO FLAP AGAIN</strong>`;
           startOverlay.style.display = 'block';
-          startOverlay.onclick = () => location.reload(); // simple restart
+          startOverlay.onclick = () => location.reload();
         }
 
-        if (p.x + 40 < bird.x && !p.passed) {
+        if (p.x + 45 < bird.x && !p.passed) {
           p.passed = true;
           score++;
           scoreEl.textContent = score;
 
-          // Difficulty ramp every 50 points
           if (score % 50 === 0) {
             level++;
-            gameSpeed += 0.4;
-            baseGap = Math.max(160, baseGap - 12);
+            gameSpeed += 0.45;
+            baseGap = Math.max(165, baseGap - 15);
           }
         }
 
-        if (p.x < -80) pipes.splice(i, 1);
+        if (p.x < -90) pipes.splice(i, 1);
       }
 
-      // Wall crash
-      if (bird.y > canvas.height - 60 || bird.y < 30) {
+      if (bird.y > canvas.height - 70 || bird.y < 30) {
         gameRunning = false;
-        startOverlay.innerHTML = `DODO LIQUIDATED<br><small>Score: ${score}</small><br><br><strong>CLICK TO FLAP AGAIN</strong>`;
+        startOverlay.innerHTML = `DODO LIQUIDATED<br><small>Score: ${score}</small><br><br><strong>TAP TO FLAP AGAIN</strong>`;
         startOverlay.style.display = 'block';
         startOverlay.onclick = () => location.reload();
       }
@@ -270,10 +342,8 @@
       requestAnimationFrame(gameLoop);
     }
 
-    // Start everything
     window.onload = () => {
       startIntroCountdown();
-      console.log('%cDODO game loaded - ready for chaos', 'color:#ff0000');
     };
   </script>
 </body>
