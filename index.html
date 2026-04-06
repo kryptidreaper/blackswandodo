@@ -1,1 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DODO the Black Swan</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0a0a0a;
+      color: #ff0000;
+      font-family: monospace;
+      text-align: center;
+      min-height: 100vh;
+    }
+    h1 { font-size: 48px; margin: 20px 0 10px; text-shadow: 0 0 20px #ff0000; }
+    h2 { font-size: 22px; color: #ff6666; margin-bottom: 40px; }
+    .egg {
+      width: 260px;
+      height: 320px;
+      margin: 30px auto;
+      background: #ddd;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      border: 14px solid #111;
+      position: relative;
+      box-shadow: 0 0 50px #ff0000;
+      animation: shake 1.8s infinite;
+    }
+    .egg::before {
+      content: "🥚";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 110px;
+    }
+    .crack {
+      position: absolute;
+      background: #111;
+      height: 6px;
+      animation: crack 3.5s infinite;
+    }
+    .crack1 { top: 28%; left: 18%; width: 65%; transform: rotate(38deg); }
+    .crack2 { top: 48%; left: 12%; width: 72%; transform: rotate(-28deg); animation-delay: 0.7s; }
+    .crack3 { top: 68%; left: 22%; width: 58%; transform: rotate(42deg); animation-delay: 1.4s; }
+    #countdown {
+      font-size: 36px;
+      font-weight: bold;
+      letter-spacing: 6px;
+      color: #ff0000;
+      text-shadow: 0 0 15px #ff0000;
+      margin: 40px 0;
+    }
+    p { font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <h1>DODO</h1>
+  <h2>THE BLACK SWAN</h2>
+  
+  <div class="egg">
+    <div class="crack crack1"></div>
+    <div class="crack crack2"></div>
+    <div class="crack crack3"></div>
+  </div>
 
+  <h2>HATCHING IN</h2>
+  <div id="countdown"></div>
+
+  <p>
+    Hatched on /biz/ July 31 2021<br>
+    5 years later... the black swan returns to Solana.<br><br>
+    Something’s coming.
+  </p>
+
+  <p style="margin-top:60px; font-size:14px;">
+    <a href="https://x.com/BlackSwanDodo_" style="color:#ff6666;">@BlackSwanDodo_</a> • Not financial advice. Just chaos. 🦤
+  </p>
+
+  <script>
+    function countdown() {
+      const target = new Date("2026-07-31T00:00:00Z").getTime();
+      const now = new Date().getTime();
+      const distance = target - now;
+
+      if (distance < 0) {
+        document.getElementById("countdown").innerHTML = "DODO HAS HATCHED 🦤";
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").innerHTML = 
+        `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+    setInterval(countdown, 1000);
+    countdown();
+  </script>
+</body>
+</html>
