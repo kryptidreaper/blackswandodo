@@ -42,9 +42,9 @@
     }
     
     .start-btn { 
-      font-size:2.4rem; padding:20px 55px; background:#000; 
+      font-size:2.4rem; padding:22px 60px; background:#000; 
       border:8px solid #ff0000; color:#ff0000; cursor:pointer; 
-      margin-top:25px; text-shadow:0 0 20px #ff0000; 
+      margin-top:30px; text-shadow:0 0 20px #ff0000; 
     }
     .start-btn:active { background:#ff0000; color:#000; }
 
@@ -66,7 +66,6 @@
       max-width:85%; cursor:pointer; 
     }
 
-    /* Live fake scores on the side */
     .live-score {
       position: absolute;
       right: 15px;
@@ -83,8 +82,8 @@
 </head>
 <body>
 
-  <!-- INTRO SCREEN - Cleaner & better on phone -->
-  <div class="intro" id="intro">
+  <!-- INTRO SCREEN -->
+  <div class="intro" id="intro" onclick="startGame()">
     <h1>DODO</h1>
     <div class="subtitle">THE BLACK SWAN</div>
     
@@ -107,7 +106,7 @@
       • Survive as long as you can
     </div>
 
-    <div onclick="startGame()" class="start-btn">FLAP INTO CHAOS</div>
+    <div class="start-btn">FLAP INTO CHAOS</div>
   </div>
 
   <!-- GAME SCREEN -->
@@ -141,7 +140,7 @@
       }, 1000);
     }
 
-    // Game
+    // Game Variables
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
     const scoreEl = document.getElementById('score');
@@ -163,11 +162,7 @@
     let baseGap = 215;
     let level = 1;
 
-    // Fake usernames for live scores
-    const fakeUsers = [
-      "@SolanaChad", "@CryptoWhale69", "@BizDegenerate", "@SwanSurvivor", 
-      "@DodoHolder", "@BlackSwanKing", "@LiquidationVictim", "@ChaosTrader"
-    ];
+    const fakeUsers = ["@SolanaChad", "@CryptoWhale69", "@BizDegenerate", "@SwanSurvivor", "@DodoHolder", "@BlackSwanKing", "@ChaosTrader"];
 
     function startGame() {
       introScreen.style.display = 'none';
@@ -192,9 +187,24 @@
       if (gameRunning) bird.vy = flapStrength;
     }
 
-    // Tap anywhere + keyboard
-    document.addEventListener('touchstart', e => { e.preventDefault(); flap(); });
-    document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); flap(); } });
+    // Tap anywhere works on both intro and game
+    document.addEventListener('touchstart', e => { 
+      e.preventDefault(); 
+      if (introScreen.style.display !== 'none') {
+        startGame();
+      } else {
+        flap();
+      }
+    });
+
+    document.addEventListener('keydown', e => { 
+      if (e.code === 'Space') { 
+        e.preventDefault(); 
+        if (introScreen.style.display !== 'none') startGame();
+        else flap(); 
+      } 
+    });
+
     canvas.addEventListener('mousedown', flap);
 
     function createPipe() {
@@ -204,7 +214,13 @@
       const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
       const isInverted = Math.random() > 0.45;
       
-      pipes.push({ x: canvas.width + 100, top: topHeight, bottom: canvas.height - (topHeight + gap), passed: false, inverted: isInverted });
+      pipes.push({ 
+        x: canvas.width + 100, 
+        top: topHeight, 
+        bottom: canvas.height - (topHeight + gap), 
+        passed: false, 
+        inverted: isInverted 
+      });
     }
 
     function drawCrudeCandle(x, y, height, isGreen) {
@@ -221,20 +237,20 @@
     }
 
     function showLiveScore() {
-      if (!gameRunning || Math.random() > 0.4) return;
+      if (!gameRunning || Math.random() > 0.35) return;
       
       const user = fakeUsers[Math.floor(Math.random() * fakeUsers.length)];
-      const points = Math.floor(Math.random() * 40) + 15;
+      const points = Math.floor(Math.random() * 45) + 12;
       
       const el = document.createElement('div');
       el.className = 'live-score';
-      el.style.top = (80 + Math.random() * 300) + 'px';
+      el.style.top = (70 + Math.random() * 320) + 'px';
       el.textContent = `${user} +${points}`;
       document.body.appendChild(el);
       
-      setTimeout(() => { el.style.opacity = '1'; }, 10);
-      setTimeout(() => { el.style.opacity = '0'; }, 1400);
-      setTimeout(() => { el.remove(); }, 2200);
+      setTimeout(() => el.style.opacity = '1', 10);
+      setTimeout(() => el.style.opacity = '0', 1300);
+      setTimeout(() => el.remove(), 2000);
     }
 
     function gameLoop() {
@@ -243,13 +259,15 @@
       ctx.fillStyle = '#0a0a0a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Grid
       ctx.strokeStyle = 'rgba(255,30,30,0.12)';
       ctx.lineWidth = 2;
-      for (let i = 50; i < canvas.width; i += 80) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
-      for (let i = 40; i < canvas.height; i += 65) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
+      for (let i = 50; i < canvas.width; i += 80) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+      }
+      for (let i = 40; i < canvas.height; i += 65) {
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+      }
 
-      // Bird
       bird.vy += gravity;
       bird.y += bird.vy;
       bird.rotation = Math.min(Math.max(bird.vy * 4.2, -32), 52);
@@ -261,7 +279,7 @@
       ctx.restore();
 
       if (frame % 78 === 0) createPipe();
-      if (frame % 35 === 0) showLiveScore();
+      if (frame % 32 === 0) showLiveScore();
 
       for (let i = pipes.length - 1; i >= 0; i--) {
         let p = pipes[i];
@@ -289,4 +307,29 @@
           score++;
           scoreEl.textContent = score;
           if (score % 50 === 0) {
-            level++; gameSpeed += 0.45;
+            level++;
+            gameSpeed += 0.45;
+            baseGap = Math.max(165, baseGap - 15);
+          }
+        }
+
+        if (p.x < -90) pipes.splice(i, 1);
+      }
+
+      if (bird.y > canvas.height - 70 || bird.y < 30) {
+        gameRunning = false;
+        startOverlay.innerHTML = `DODO LIQUIDATED<br><small>Score: ${score}</small><br><br><strong>TAP TO FLAP AGAIN</strong>`;
+        startOverlay.style.display = 'block';
+        startOverlay.onclick = () => location.reload();
+      }
+
+      frame++;
+      requestAnimationFrame(gameLoop);
+    }
+
+    window.onload = () => {
+      startIntroCountdown();
+    };
+  </script>
+</body>
+</html>
