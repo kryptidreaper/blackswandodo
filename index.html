@@ -12,7 +12,7 @@
 </head>
 <body>
   <div id="score">0</div>
-  <div id="start" onclick="startGame()">CLICK TO START<br><small>SPACE or CLICK to flap<br>Survive the candles • Cause chaos</small></div>
+  <div id="start" onclick="startGame()">CLICK TO START<br><small>SPACE or CLICK to flap<br>Red = death • Green = safe • Survive the chart</small></div>
   <canvas id="game" width="800" height="500"></canvas>
 
   <script>
@@ -22,16 +22,16 @@
     const startScreen = document.getElementById('start');
 
     let dodoImg = new Image();
-    dodoImg.src = 'https://i.imgur.com/s9vyjYO.jpg';
+    dodoImg.src = 'https://i.imgur.com/ZolkD0O.jpg';
 
     let bird = { x: 150, y: 250, vy: 0, size: 72, rotation: 0 };
-    let gravity = 0.42;
-    let flapStrength = -10;
+    let gravity = 0.45;
+    let flapStrength = -10.5;
     let score = 0;
     let gameRunning = false;
     let pipes = [];
     let frame = 0;
-    let gameSpeed = 2.8;   // slower = more fair
+    let gameSpeed = 2.6;
 
     function startGame() {
       startScreen.style.display = 'none';
@@ -58,13 +58,13 @@
     canvas.addEventListener('touchstart', e => { e.preventDefault(); flap(); });
 
     function createPipe() {
-      const gap = 195;                    // ← much bigger gap now
-      const minHeight = 80;
-      const maxHeight = canvas.height - gap - minHeight;
+      const gap = 210;                    // bigger safe zone
+      const minHeight = 90;
+      const maxHeight = canvas.height - gap - minHeight - 40;
       const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
       
       pipes.push({
-        x: canvas.width + 50,
+        x: canvas.width + 80,               // more space between sets
         top: topHeight,
         bottom: canvas.height - (topHeight + gap),
         passed: false
@@ -74,17 +74,17 @@
     function drawCrudeCandle(x, y, height, isGreen) {
       ctx.save();
       ctx.translate(x, y);
-      ctx.rotate(Math.sin(frame / 10) * 0.05);
+      ctx.rotate(Math.sin(frame / 12) * 0.04);
       
       ctx.fillStyle = isGreen ? '#00ff55' : '#ff2222';
-      ctx.fillRect(-15, isGreen ? -height : 0, 30, height);
+      ctx.fillRect(-16, isGreen ? -height : 0, 32, height);
       
       ctx.strokeStyle = '#000';
-      ctx.lineWidth = 8;
-      ctx.strokeRect(-15, isGreen ? -height : 0, 30, height);
+      ctx.lineWidth = 9;
+      ctx.strokeRect(-16, isGreen ? -height : 0, 32, height);
       
       ctx.fillStyle = '#111';
-      ctx.fillRect(-4, isGreen ? -height - 28 : height + 8, 8, 32);
+      ctx.fillRect(-5, isGreen ? -height - 30 : height + 10, 10, 35);
       
       ctx.restore();
     }
@@ -95,20 +95,20 @@
       ctx.fillStyle = '#0a0a0a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // faint chart grid
+      // faint grid
       ctx.strokeStyle = 'rgba(255,30,30,0.12)';
       ctx.lineWidth = 2;
-      for (let i = 40; i < canvas.width; i += 70) {
+      for (let i = 50; i < canvas.width; i += 80) {
         ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
       }
-      for (let i = 40; i < canvas.height; i += 60) {
+      for (let i = 40; i < canvas.height; i += 65) {
         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
       }
 
-      // Update bird
+      // Bird physics
       bird.vy += gravity;
       bird.y += bird.vy;
-      bird.rotation = Math.min(Math.max(bird.vy * 4.2, -28), 48);
+      bird.rotation = Math.min(Math.max(bird.vy * 4, -30), 50);
 
       // Draw DODO
       ctx.save();
@@ -117,44 +117,47 @@
       ctx.drawImage(dodoImg, -bird.size/2, -bird.size/2, bird.size, bird.size);
       ctx.restore();
 
-      // Spawn candles less often
-      if (frame % 75 === 0) createPipe();
+      // Spawn pipes less frequently
+      if (frame % 85 === 0) createPipe();
 
       for (let i = pipes.length - 1; i >= 0; i--) {
         let p = pipes[i];
         p.x -= gameSpeed;
 
+        // Red top candle = deadly
         drawCrudeCandle(p.x, p.top / 2, p.top, false);
+        
+        // Green bottom candle = safe to pass
         drawCrudeCandle(p.x, canvas.height - p.bottom / 2, p.bottom, true);
 
-        // Collision (more forgiving)
-        const birdLeft = bird.x - bird.size/2 + 12;
-        const birdRight = bird.x + bird.size/2 - 12;
-        const birdTop = bird.y - bird.size/2 + 18;
-        const birdBottom = bird.y + bird.size/2 - 18;
+        // Collision - only check the RED top candle
+        const birdLeft = bird.x - bird.size/2 + 15;
+        const birdRight = bird.x + bird.size/2 - 15;
+        const birdTop = bird.y - bird.size/2 + 20;
+        const birdBottom = bird.y + bird.size/2 - 20;
 
         if (
-          birdRight > p.x - 10 && birdLeft < p.x + 35 &&
-          (birdTop < p.top - 10 || birdBottom > canvas.height - p.bottom + 10)
+          birdRight > p.x - 12 && birdLeft < p.x + 38 &&
+          birdTop < p.top + 20
         ) {
           gameRunning = false;
-          startScreen.innerHTML = `BLACK SWAN EVENT<br>Score: ${score}<br><small>Click to flap again • Something’s coming...</small>`;
+          startScreen.innerHTML = `BLACK SWAN EVENT<br>Score: ${score}<br><small>Red candle got you • Click to try again</small>`;
           startScreen.style.display = 'block';
         }
 
-        if (p.x + 30 < bird.x && !p.passed) {
+        if (p.x + 40 < bird.x && !p.passed) {
           p.passed = true;
           score++;
           scoreEl.textContent = score;
         }
 
-        if (p.x < -60) pipes.splice(i, 1);
+        if (p.x < -80) pipes.splice(i, 1);
       }
 
-      // Wall crash
-      if (bird.y > canvas.height - 55 || bird.y < 35) {
+      // Wall crashes
+      if (bird.y > canvas.height - 60 || bird.y < 30) {
         gameRunning = false;
-        startScreen.innerHTML = `YOU HIT THE CHART<br>Score: ${score}<br><small>Click to try again</small>`;
+        startScreen.innerHTML = `YOU HIT THE CHART<br>Score: ${score}<br><small>Click to flap again</small>`;
         startScreen.style.display = 'block';
       }
 
@@ -162,7 +165,7 @@
       requestAnimationFrame(gameLoop);
     }
 
-    dodoImg.onload = () => console.log('DODO ready');
+    dodoImg.onload = () => console.log('New DODO ready');
   </script>
 </body>
 </html>
