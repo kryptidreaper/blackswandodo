@@ -7,8 +7,7 @@
     body { margin:0; background:#000; overflow:hidden; font-family: 'Courier New', monospace; color:#ff0000; text-align:center; }
     canvas { display:block; margin:0 auto; image-rendering: pixelated; }
     #score { position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:2.8rem; text-shadow:0 0 25px #ff0000; pointer-events:none; }
-    #start { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:2.2rem; background:rgba(0,0,0,0.85); padding:30px 50px; border:6px solid #ff0000; cursor:pointer; line-height:1.4; }
-    .glow { text-shadow: 0 0 30px #ff0000; }
+    #start { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:2.2rem; background:rgba(0,0,0,0.85); padding:30px 50px; border:6px solid #ff0000; cursor:pointer; line-height:1.4; text-align:center; }
   </style>
 </head>
 <body>
@@ -23,16 +22,16 @@
     const startScreen = document.getElementById('start');
 
     let dodoImg = new Image();
-    dodoImg.src = 'https://i.imgur.com/s9vyjYO.jpg';   // Your real DODO
+    dodoImg.src = 'https://i.imgur.com/s9vyjYO.jpg';
 
-    let bird = { x: 150, y: 250, vy: 0, size: 68, rotation: 0 };
-    let gravity = 0.48;
-    let flapStrength = -9.5;
+    let bird = { x: 150, y: 250, vy: 0, size: 72, rotation: 0 };
+    let gravity = 0.42;
+    let flapStrength = -10;
     let score = 0;
     let gameRunning = false;
     let pipes = [];
     let frame = 0;
-    let gameSpeed = 3.4;
+    let gameSpeed = 2.8;   // slower = more fair
 
     function startGame() {
       startScreen.style.display = 'none';
@@ -59,13 +58,13 @@
     canvas.addEventListener('touchstart', e => { e.preventDefault(); flap(); });
 
     function createPipe() {
-      const gap = 165;
-      const minHeight = 90;
+      const gap = 195;                    // ← much bigger gap now
+      const minHeight = 80;
       const maxHeight = canvas.height - gap - minHeight;
       const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
       
       pipes.push({
-        x: canvas.width + 40,
+        x: canvas.width + 50,
         top: topHeight,
         bottom: canvas.height - (topHeight + gap),
         passed: false
@@ -75,17 +74,17 @@
     function drawCrudeCandle(x, y, height, isGreen) {
       ctx.save();
       ctx.translate(x, y);
-      ctx.rotate(Math.sin(frame / 8) * 0.06);
+      ctx.rotate(Math.sin(frame / 10) * 0.05);
       
       ctx.fillStyle = isGreen ? '#00ff55' : '#ff2222';
-      ctx.fillRect(-14, isGreen ? -height : 0, 28, height);
+      ctx.fillRect(-15, isGreen ? -height : 0, 30, height);
       
       ctx.strokeStyle = '#000';
-      ctx.lineWidth = 7;
-      ctx.strokeRect(-14, isGreen ? -height : 0, 28, height);
+      ctx.lineWidth = 8;
+      ctx.strokeRect(-15, isGreen ? -height : 0, 30, height);
       
       ctx.fillStyle = '#111';
-      ctx.fillRect(-3, isGreen ? -height - 25 : height + 5, 6, 30);
+      ctx.fillRect(-4, isGreen ? -height - 28 : height + 8, 8, 32);
       
       ctx.restore();
     }
@@ -96,49 +95,54 @@
       ctx.fillStyle = '#0a0a0a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // faint chart grid
       ctx.strokeStyle = 'rgba(255,30,30,0.12)';
       ctx.lineWidth = 2;
-      for (let i = 40; i < canvas.width; i += 65) {
+      for (let i = 40; i < canvas.width; i += 70) {
         ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
       }
-      for (let i = 40; i < canvas.height; i += 55) {
+      for (let i = 40; i < canvas.height; i += 60) {
         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
       }
 
+      // Update bird
       bird.vy += gravity;
       bird.y += bird.vy;
-      bird.rotation = Math.min(Math.max(bird.vy * 4.5, -30), 50);
+      bird.rotation = Math.min(Math.max(bird.vy * 4.2, -28), 48);
 
+      // Draw DODO
       ctx.save();
       ctx.translate(bird.x, bird.y);
       ctx.rotate(bird.rotation * Math.PI / 180);
       ctx.drawImage(dodoImg, -bird.size/2, -bird.size/2, bird.size, bird.size);
       ctx.restore();
 
-      if (frame % 62 === 0) createPipe();
+      // Spawn candles less often
+      if (frame % 75 === 0) createPipe();
 
       for (let i = pipes.length - 1; i >= 0; i--) {
         let p = pipes[i];
         p.x -= gameSpeed;
 
-        drawCrudeCandle(p.x + 10, p.top / 2, p.top, false);
-        drawCrudeCandle(p.x + 10, canvas.height - p.bottom / 2, p.bottom, true);
+        drawCrudeCandle(p.x, p.top / 2, p.top, false);
+        drawCrudeCandle(p.x, canvas.height - p.bottom / 2, p.bottom, true);
 
-        const birdLeft = bird.x - bird.size/2 + 10;
-        const birdRight = bird.x + bird.size/2 - 10;
-        const birdTop = bird.y - bird.size/2 + 15;
-        const birdBottom = bird.y + bird.size/2 - 15;
+        // Collision (more forgiving)
+        const birdLeft = bird.x - bird.size/2 + 12;
+        const birdRight = bird.x + bird.size/2 - 12;
+        const birdTop = bird.y - bird.size/2 + 18;
+        const birdBottom = bird.y + bird.size/2 - 18;
 
         if (
-          birdRight > p.x - 8 && birdLeft < p.x + 28 &&
-          (birdTop < p.top || birdBottom > canvas.height - p.bottom)
+          birdRight > p.x - 10 && birdLeft < p.x + 35 &&
+          (birdTop < p.top - 10 || birdBottom > canvas.height - p.bottom + 10)
         ) {
           gameRunning = false;
-          startScreen.innerHTML = `YOU GOT BLACK SWANNED<br>Score: ${score}<br><small>Click to flap again • Something’s coming...</small>`;
+          startScreen.innerHTML = `BLACK SWAN EVENT<br>Score: ${score}<br><small>Click to flap again • Something’s coming...</small>`;
           startScreen.style.display = 'block';
         }
 
-        if (p.x + 20 < bird.x && !p.passed) {
+        if (p.x + 30 < bird.x && !p.passed) {
           p.passed = true;
           score++;
           scoreEl.textContent = score;
@@ -147,9 +151,10 @@
         if (p.x < -60) pipes.splice(i, 1);
       }
 
-      if (bird.y > canvas.height - 50 || bird.y < 30) {
+      // Wall crash
+      if (bird.y > canvas.height - 55 || bird.y < 35) {
         gameRunning = false;
-        startScreen.innerHTML = `CRASHED INTO THE CHART<br>Score: ${score}<br><small>Click to try again</small>`;
+        startScreen.innerHTML = `YOU HIT THE CHART<br>Score: ${score}<br><small>Click to try again</small>`;
         startScreen.style.display = 'block';
       }
 
@@ -157,7 +162,7 @@
       requestAnimationFrame(gameLoop);
     }
 
-    dodoImg.onload = () => console.log('DODO loaded');
+    dodoImg.onload = () => console.log('DODO ready');
   </script>
 </body>
 </html>
