@@ -2,95 +2,162 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DODO - The Black Swan</title>
+  <title>DODO FLAP - Black Swan Market Chaos</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      color: #ff0000;
-      font-family: 'Courier New', monospace;
-      text-align: center;
-      overflow: hidden;
-    }
-    .container {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 5rem;
-      margin: 10px 0 5px;
-      text-shadow: 0 0 30px #ff0000;
-      letter-spacing: 10px;
-    }
-    .subtitle { font-size: 1.8rem; margin-bottom: 30px; }
-    
-    .dodo-image {
-      max-width: 420px;
-      margin: 30px 0;
-      filter: drop-shadow(0 0 40px rgba(255, 30, 30, 0.6));
-      image-rendering: pixelated; /* keeps it crisp if it's a low-res meme */
-    }
-    
-    .timer {
-      font-size: 3.5rem;
-      font-weight: bold;
-      letter-spacing: 15px;
-      text-shadow: 0 0 40px #ff0000;
-      margin: 20px 0 40px;
-    }
-    .footer {
-      max-width: 600px;
-      line-height: 1.7;
-      font-size: 1.2rem;
-    }
-    .glow { text-shadow: 0 0 20px #ff0000; }
+    body { margin:0; background:#000; overflow:hidden; font-family: 'Courier New', monospace; color:#ff0000; text-align:center; }
+    canvas { display:block; margin:0 auto; image-rendering: pixelated; }
+    #score { position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:2.8rem; text-shadow:0 0 25px #ff0000; pointer-events:none; }
+    #start { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:2.2rem; background:rgba(0,0,0,0.85); padding:30px 50px; border:6px solid #ff0000; cursor:pointer; line-height:1.4; }
+    .glow { text-shadow: 0 0 30px #ff0000; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="glow">DODO</h1>
-    <div class="subtitle">THE BLACK SWAN</div>
-    
-    <!-- Replace this src with your actual DODO image URL or local file -->
-    <img src="YOUR_DODO_IMAGE_HERE.jpg" alt="DODO The Black Swan" class="dodo-image">
-    
-    <div class="timer" id="timer">115d 18h 3m 28s</div>
-    
-    <div class="footer">
-      <p>Hatched on /biz/ July 31 2021</p>
-      <p>5 years later... the black swan returns to Solana.</p>
-      <p class="glow">Something’s coming.</p>
-      <p style="margin-top: 50px; opacity: 0.8;">
-        @BlackSwanDodo • Not financial advice. Just chaos. 🦢
-      </p>
-    </div>
-  </div>
+  <div id="score">0</div>
+  <div id="start" onclick="startGame()">CLICK TO START<br><small>SPACE or CLICK to flap<br>Survive the candles • Cause chaos</small></div>
+  <canvas id="game" width="800" height="500"></canvas>
 
   <script>
-    function startCountdown() {
-      // Change this date if you want a real future target
-      let target = new Date().getTime() + (115 * 24 * 60 * 60 * 1000) + (18*60*60*1000) + (3*60*1000) + (28*1000);
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const startScreen = document.getElementById('start');
 
-      setInterval(() => {
-        let distance = target - Date.now();
-        if (distance < 0) {
-          document.getElementById("timer").innerHTML = "IT'S HERE";
-          return;
-        }
-        let d = Math.floor(distance / (1000*60*60*24));
-        let h = Math.floor((distance % (1000*60*60*24)) / (1000*60*60));
-        let m = Math.floor((distance % (1000*60*60)) / (1000*60));
-        let s = Math.floor((distance % (1000*60)) / 1000);
-        document.getElementById("timer").innerHTML = `${d}d ${h.toString().padStart(2,'0')}h ${m.toString().padStart(2,'0')}m ${s.toString().padStart(2,'0')}s`;
-      }, 1000);
+    let dodoImg = new Image();
+    dodoImg.src = 'https://i.imgur.com/s9vyjYO.jpg';   // Your real DODO
+
+    let bird = { x: 150, y: 250, vy: 0, size: 68, rotation: 0 };
+    let gravity = 0.48;
+    let flapStrength = -9.5;
+    let score = 0;
+    let gameRunning = false;
+    let pipes = [];
+    let frame = 0;
+    let gameSpeed = 3.4;
+
+    function startGame() {
+      startScreen.style.display = 'none';
+      resetGame();
+      gameRunning = true;
+      requestAnimationFrame(gameLoop);
     }
-    window.onload = startCountdown;
+
+    function resetGame() {
+      bird.y = 250;
+      bird.vy = 0;
+      score = 0;
+      pipes = [];
+      frame = 0;
+      scoreEl.textContent = '0';
+    }
+
+    function flap() {
+      if (gameRunning) bird.vy = flapStrength;
+    }
+
+    document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); flap(); } });
+    canvas.addEventListener('mousedown', flap);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); flap(); });
+
+    function createPipe() {
+      const gap = 165;
+      const minHeight = 90;
+      const maxHeight = canvas.height - gap - minHeight;
+      const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+      
+      pipes.push({
+        x: canvas.width + 40,
+        top: topHeight,
+        bottom: canvas.height - (topHeight + gap),
+        passed: false
+      });
+    }
+
+    function drawCrudeCandle(x, y, height, isGreen) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.sin(frame / 8) * 0.06);
+      
+      ctx.fillStyle = isGreen ? '#00ff55' : '#ff2222';
+      ctx.fillRect(-14, isGreen ? -height : 0, 28, height);
+      
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 7;
+      ctx.strokeRect(-14, isGreen ? -height : 0, 28, height);
+      
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-3, isGreen ? -height - 25 : height + 5, 6, 30);
+      
+      ctx.restore();
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = 'rgba(255,30,30,0.12)';
+      ctx.lineWidth = 2;
+      for (let i = 40; i < canvas.width; i += 65) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+      }
+      for (let i = 40; i < canvas.height; i += 55) {
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+      }
+
+      bird.vy += gravity;
+      bird.y += bird.vy;
+      bird.rotation = Math.min(Math.max(bird.vy * 4.5, -30), 50);
+
+      ctx.save();
+      ctx.translate(bird.x, bird.y);
+      ctx.rotate(bird.rotation * Math.PI / 180);
+      ctx.drawImage(dodoImg, -bird.size/2, -bird.size/2, bird.size, bird.size);
+      ctx.restore();
+
+      if (frame % 62 === 0) createPipe();
+
+      for (let i = pipes.length - 1; i >= 0; i--) {
+        let p = pipes[i];
+        p.x -= gameSpeed;
+
+        drawCrudeCandle(p.x + 10, p.top / 2, p.top, false);
+        drawCrudeCandle(p.x + 10, canvas.height - p.bottom / 2, p.bottom, true);
+
+        const birdLeft = bird.x - bird.size/2 + 10;
+        const birdRight = bird.x + bird.size/2 - 10;
+        const birdTop = bird.y - bird.size/2 + 15;
+        const birdBottom = bird.y + bird.size/2 - 15;
+
+        if (
+          birdRight > p.x - 8 && birdLeft < p.x + 28 &&
+          (birdTop < p.top || birdBottom > canvas.height - p.bottom)
+        ) {
+          gameRunning = false;
+          startScreen.innerHTML = `YOU GOT BLACK SWANNED<br>Score: ${score}<br><small>Click to flap again • Something’s coming...</small>`;
+          startScreen.style.display = 'block';
+        }
+
+        if (p.x + 20 < bird.x && !p.passed) {
+          p.passed = true;
+          score++;
+          scoreEl.textContent = score;
+        }
+
+        if (p.x < -60) pipes.splice(i, 1);
+      }
+
+      if (bird.y > canvas.height - 50 || bird.y < 30) {
+        gameRunning = false;
+        startScreen.innerHTML = `CRASHED INTO THE CHART<br>Score: ${score}<br><small>Click to try again</small>`;
+        startScreen.style.display = 'block';
+      }
+
+      frame++;
+      requestAnimationFrame(gameLoop);
+    }
+
+    dodoImg.onload = () => console.log('DODO loaded');
   </script>
 </body>
 </html>
